@@ -513,6 +513,15 @@ function setTab(btn, panelId){
 }
 
 function togglePlay(){
+  var vid = document.getElementById('ev-video');
+  if(vid){
+    if(vid.paused){ vid.play(); playing=true; } else { vid.pause(); playing=false; }
+    document.getElementById('play-icon').innerHTML = playing
+      ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+      : '<path d="M5 3l14 9-14 9V3z"/>';
+    vid.onended = function(){ playing=false; document.getElementById('play-icon').innerHTML='<path d="M5 3l14 9-14 9V3z"/>'; };
+    return;
+  }
   playing=!playing;
   document.getElementById('play-icon').innerHTML = playing
     ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
