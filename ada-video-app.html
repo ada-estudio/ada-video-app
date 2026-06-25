@@ -570,7 +570,10 @@ function initTrimUI(){
   var vid = document.getElementById('ev-video');
   if(!vid) return;
   var setup = function(){
-    var dur = Math.max(1, Math.floor(vid.duration || recSec || 42));
+    // MediaRecorder WebM tem duration=Infinity — usar recSec como fallback
+    var dur = (isFinite(vid.duration) && vid.duration > 0)
+      ? Math.floor(vid.duration)
+      : Math.max(1, recSec || 10);
     var ts = document.getElementById('trim-start');
     var te = document.getElementById('trim-end');
     ts.max = dur; ts.value = 0;
@@ -580,8 +583,12 @@ function initTrimUI(){
     trimStart = 0;
     trimEnd = dur;
   };
-  if(vid.readyState >= 1) setup();
-  else vid.onloadedmetadata = setup;
+  if(vid.readyState >= 1 && isFinite(vid.duration)) { setup(); return; }
+  vid.onloadedmetadata = function(){
+    if(isFinite(vid.duration)) setup();
+    else { setTimeout(setup, 100); } // fallback para WebM sem metadado
+  };
+  setTimeout(function(){ if(trimEnd===null) setup(); }, 600); // garantia
 }
 
 function moverTrimStart(v){
@@ -620,7 +627,9 @@ function atualizarDurClipe(){
 function selecionarMelhores30(){
   var vid = document.getElementById('ev-video');
   if(!vid){ showToast('Nenhum vídeo carregado'); return; }
-  var durTotal = Math.floor(vid.duration || recSec || 0);
+  var durTotal = (isFinite(vid.duration) && vid.duration > 0)
+    ? Math.floor(vid.duration)
+    : Math.max(1, recSec || 0);
   if(durTotal === 0){ showToast('Aguarde o vídeo carregar'); return; }
   var end = Math.min(30, durTotal);
   trimStart = 0;
