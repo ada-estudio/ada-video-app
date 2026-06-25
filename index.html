@@ -414,7 +414,7 @@ function iniciarGravacao(){
     try {
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = function(e){ if(e.data.size>0) recordedChunks.push(e.data); };
-      mediaRecorder.start();
+      mediaRecorder.start(1000);
     } catch(e){ mediaRecorder = null; }
   }
   document.getElementById('cam-rec').classList.add('on');
@@ -446,27 +446,28 @@ function finalizarGravacao(){
   videoCount++;
   localStorage.setItem('ada_videos', videoCount);
   updateStats();
-  // Montar vídeo gravado e mostrar no editor
-  if(mediaRecorder && recordedChunks.length > 0){
-    mediaRecorder.stop();
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
     mediaRecorder.onstop = function(){
-      if(recordedUrl) URL.revokeObjectURL(recordedUrl);
-      var blob = new Blob(recordedChunks, {type:'video/webm'});
-      recordedUrl = URL.createObjectURL(blob);
-      var evPreview = document.querySelector('#editor .ev-preview');
-      var existing = document.getElementById('ev-video');
-      if(existing) existing.remove();
-      var vid = document.createElement('video');
-      vid.id = 'ev-video';
-      vid.src = recordedUrl;
-      vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9';
-      vid.controls = false;
-      vid.loop = true;
-      vid.muted = true;
-      vid.play();
-      evPreview.appendChild(vid);
+      if(recordedChunks.length > 0){
+        if(recordedUrl) URL.revokeObjectURL(recordedUrl);
+        var blob = new Blob(recordedChunks, {type:'video/webm'});
+        recordedUrl = URL.createObjectURL(blob);
+        var evPreview = document.querySelector('#editor .ev-preview');
+        var existing = document.getElementById('ev-video');
+        if(existing) existing.remove();
+        var vid = document.createElement('video');
+        vid.id = 'ev-video';
+        vid.src = recordedUrl;
+        vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9';
+        vid.controls = false;
+        vid.loop = true;
+        vid.muted = true;
+        vid.play();
+        evPreview.appendChild(vid);
+      }
       goTo('editor','camera');
     };
+    mediaRecorder.stop();
   } else {
     goTo('editor','camera');
   }
