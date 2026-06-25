@@ -8,227 +8,526 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ADA — Vídeos Virais com IA</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--gold:#C9A84C;--gold2:#F0D080;--bg:#0a0a14;--bg2:#12121f;--bg3:#16162a;--bg4:#1e1e38;--border:#2a2a4a;--purple:#7C3AED;--purple2:#9D6FFF;--pink:#EC4899;--teal:#06B6D4;--green:#10B981;--text:#F8F8FF;--text2:#A0A0C0;--text3:#606080;--red:#FF3B30}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
-.app{max-width:430px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;position:relative;overflow:hidden}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
-.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
-.screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:52px 20px 16px;flex-shrink:0}
-.topbar-logo{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:6px}
-.topbar-back{background:var(--bg4);border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:20px;cursor:pointer}
-.topbar-title{font-size:17px;font-weight:600;color:var(--text)}
-.topbar-action{background:none;border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text2);font-size:12px;cursor:pointer}
-#home .content{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 24px;overflow-y:auto}
-.home-tagline{font-size:13px;color:var(--text3);text-align:center;margin-bottom:36px}
-.rec-btn{width:180px;height:180px;border-radius:50%;background:var(--purple);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 40px rgba(124,58,237,.4);transition:transform .15s,box-shadow .15s;flex-shrink:0}
-.rec-btn:active{transform:scale(.94)}
-.rec-btn svg{width:56px;height:56px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
-.rec-btn-lbl{font-size:11px;font-weight:800;color:#fff;letter-spacing:2px;margin-top:8px}
-.import-btn{margin-top:20px;background:none;border:1px solid var(--border);border-radius:28px;padding:13px 32px;color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-top:32px;margin-bottom:24px}
-.stat{background:var(--bg3);border-radius:14px;padding:14px 8px;text-align:center}
-.stat-val{font-size:20px;font-weight:700;color:var(--gold)}
-.stat-lbl{font-size:10px;color:var(--text3);margin-top:3px}
-.recent-title{width:100%;font-size:13px;color:var(--text3);margin-bottom:12px;font-weight:500}
-.empty-state{width:100%;background:var(--bg3);border-radius:16px;padding:24px;text-align:center;color:var(--text3);font-size:13px;line-height:1.6}
-#camera .preview{flex:1;background:#000;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.preview-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--text3)}
-.preview-placeholder svg{width:64px;height:64px;opacity:.3;fill:none;stroke:currentColor;stroke-width:1.5}
-.cam-timer{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:20px;padding:8px 18px;display:none;align-items:center;gap:8px}
-.cam-timer.visible{display:flex}
-.cam-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-.cam-timer-txt{color:#fff;font-size:15px;font-weight:600}
-.cam-controls{padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg)}
-.cam-side{width:50px;height:50px;border-radius:50%;background:var(--bg4);border:none;color:var(--text);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.cam-rec{width:80px;height:80px;border-radius:50%;background:none;border:4px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.cam-rec.on{border-color:var(--red)}
-.cam-rec-inner{width:60px;height:60px;border-radius:50%;background:var(--red);transition:all .25s}
-.cam-rec.on .cam-rec-inner{border-radius:10px;width:30px;height:30px}
-.cam-hint{text-align:center;padding:0 0 8px;font-size:12px;color:var(--text3)}
-#editor .ev-preview{height:210px;background:#000;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
-.play-circle{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
-.play-circle svg{width:28px;height:28px;fill:#fff;margin-left:4px}
-.ev-duration{position:absolute;bottom:10px;right:14px;font-size:11px;color:var(--text3)}
-.ev-timeline{height:68px;background:var(--bg3);display:flex;align-items:center;padding:0 14px;gap:6px;overflow-x:auto;flex-shrink:0}
-.ev-clip{height:48px;min-width:150px;background:rgba(124,58,237,.3);border:1px solid rgba(124,58,237,.5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--purple2);flex-shrink:0}
-.ev-tabs{display:flex;background:var(--bg3);border-top:1px solid var(--border);flex-shrink:0}
-.ev-tab{flex:1;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent}
-.ev-tab.active{border-bottom-color:var(--purple)}
-.ev-tab svg{width:22px;height:22px;fill:none;stroke:var(--text3);stroke-width:2;stroke-linecap:round}
-.ev-tab.active svg{stroke:var(--purple2)}
-.ev-tab span{font-size:9px;color:var(--text3)}
-.ev-tab.active span{color:var(--purple2)}
-.ev-panel{flex:1;padding:20px;overflow-y:auto}
-.panel-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px}
-.panel-sub{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6}
-.ai-btn{width:100%;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;text-align:left}
-.ai-btn svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:var(--purple2);stroke-width:2;stroke-linecap:round}
-.ai-btn-txt{font-size:13px;color:var(--purple2);font-weight:500}
-.ai-btn.teal{background:rgba(6,182,212,.15);border-color:rgba(6,182,212,.3)}
-.ai-btn.teal svg,.ai-btn.teal .ai-btn-txt{stroke:var(--teal);color:var(--teal)}
-.ai-btn.pink{background:rgba(236,72,153,.15);border-color:rgba(236,72,153,.3)}
-.ai-btn.pink svg,.ai-btn.pink .ai-btn-txt{stroke:var(--pink);color:var(--pink)}
-.export-btn{margin:0 16px 20px;width:calc(100% - 32px);background:var(--green);border:none;border-radius:14px;padding:16px;font-size:14px;font-weight:800;color:#fff;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
-.export-btn svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;flex-shrink:0}
-.share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-bottom:32px}
-.share-btn{background:var(--bg3);border-radius:14px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border:none}
-.share-btn svg{width:28px;height:28px}
-.share-btn span{font-size:11px;color:var(--text2)}
-.nova-btn{background:var(--purple);border:none;border-radius:14px;padding:16px 40px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;width:100%}
-.bottom-nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);padding:8px 0 max(env(safe-area-inset-bottom),8px);flex-shrink:0}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px 0}
-.nav-item svg{width:24px;height:24px;fill:none;stroke:var(--border);stroke-width:2;stroke-linecap:round}
-.nav-item.active svg{stroke:var(--gold)}
-.nav-item span{font-size:10px;color:var(--text3)}
-.nav-item.active span{color:var(--gold)}
-.loading{position:fixed;inset:0;background:rgba(10,10,20,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
-.loading.visible{opacity:1;pointer-events:all}
-.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-txt{font-size:14px;color:var(--text2)}
-.toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg4);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:200}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --gold:#C9A84C;--gold2:#F0D080;
+    --bg:#0a0a14;--bg2:#12121f;--bg3:#16162a;--bg4:#1e1e38;
+    --border:#2a2a4a;
+    --purple:#7C3AED;--purple2:#9D6FFF;
+    --pink:#EC4899;--teal:#06B6D4;--green:#10B981;
+    --text:#F8F8FF;--text2:#A0A0C0;--text3:#606080;
+    --red:#FF3B30;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+  .app{max-width:430px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+  /* SCREENS */
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
+  .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+  .screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
+
+  /* TOPBAR */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:52px 20px 16px;flex-shrink:0}
+  .topbar-logo{font-size:28px;font-weight:900;color:var(--gold);letter-spacing:6px}
+  .topbar-back{background:var(--bg4);border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:20px;cursor:pointer}
+  .topbar-title{font-size:17px;font-weight:600;color:var(--text)}
+  .topbar-action{background:none;border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text2);font-size:12px;cursor:pointer}
+
+  /* HOME */
+  #home .content{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 24px;overflow-y:auto}
+  .home-tagline{font-size:13px;color:var(--text3);text-align:center;margin-bottom:36px}
+  .rec-btn{width:180px;height:180px;border-radius:50%;background:var(--purple);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 40px rgba(124,58,237,.4);transition:transform .15s,box-shadow .15s;flex-shrink:0}
+  .rec-btn:active{transform:scale(.94);box-shadow:0 0 20px rgba(124,58,237,.3)}
+  .rec-btn svg{width:56px;height:56px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+  .rec-btn-lbl{font-size:11px;font-weight:800;color:#fff;letter-spacing:2px;margin-top:8px}
+  .import-btn{margin-top:20px;background:none;border:1px solid var(--border);border-radius:28px;padding:13px 32px;color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:border-color .2s}
+  .import-btn:active{border-color:var(--purple)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-top:32px;margin-bottom:24px}
+  .stat{background:var(--bg3);border-radius:14px;padding:14px 8px;text-align:center}
+  .stat-val{font-size:20px;font-weight:700;color:var(--gold)}
+  .stat-lbl{font-size:10px;color:var(--text3);margin-top:3px}
+  .recent-title{width:100%;font-size:13px;color:var(--text3);margin-bottom:12px;font-weight:500}
+  .empty-state{width:100%;background:var(--bg3);border-radius:16px;padding:24px;text-align:center;color:var(--text3);font-size:13px;line-height:1.6}
+
+  /* CAMERA */
+  #camera .preview{flex:1;background:#000;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .preview-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--text3)}
+  .preview-placeholder svg{width:64px;height:64px;opacity:.3;fill:none;stroke:currentColor;stroke-width:1.5}
+  .preview-placeholder span{font-size:13px}
+  .cam-timer{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:20px;padding:8px 18px;display:none;align-items:center;gap:8px}
+  .cam-timer.visible{display:flex}
+  .cam-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+  .cam-timer-txt{color:#fff;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+  .cam-controls{padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg)}
+  .cam-side{width:50px;height:50px;border-radius:50%;background:var(--bg4);border:none;color:var(--text);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .cam-rec{width:80px;height:80px;border-radius:50%;background:none;border:4px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
+  .cam-rec.on{border-color:var(--red)}
+  .cam-rec-inner{width:60px;height:60px;border-radius:50%;background:var(--red);transition:all .25s cubic-bezier(.4,0,.2,1)}
+  .cam-rec.on .cam-rec-inner{border-radius:10px;width:30px;height:30px}
+  .cam-hint{text-align:center;padding:0 0 8px;font-size:12px;color:var(--text3)}
+
+  /* EDITOR */
+  #editor .ev-preview{height:210px;background:#000;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+  .play-circle{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
+  .play-circle svg{width:28px;height:28px;fill:#fff;margin-left:4px}
+  .ev-duration{position:absolute;bottom:10px;right:14px;font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums}
+  .ev-timeline{height:68px;background:var(--bg3);display:flex;align-items:center;padding:0 14px;gap:6px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+  .ev-clip{height:48px;min-width:150px;background:rgba(124,58,237,.3);border:1px solid rgba(124,58,237,.5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--purple2);flex-shrink:0}
+  .ev-tabs{display:flex;background:var(--bg3);border-top:1px solid var(--border);flex-shrink:0}
+  .ev-tab{flex:1;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s}
+  .ev-tab.active{border-bottom-color:var(--purple)}
+  .ev-tab svg{width:22px;height:22px;fill:none;stroke:var(--text3);stroke-width:2;stroke-linecap:round}
+  .ev-tab.active svg{stroke:var(--purple2)}
+  .ev-tab span{font-size:9px;color:var(--text3)}
+  .ev-tab.active span{color:var(--purple2)}
+  .ev-panel{flex:1;padding:20px;overflow-y:auto}
+  .panel-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px}
+  .panel-sub{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6}
+  .ai-btn{width:100%;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;text-align:left;transition:background .2s}
+  .ai-btn:active{background:rgba(124,58,237,.25)}
+  .ai-btn svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:var(--purple2);stroke-width:2;stroke-linecap:round}
+  .ai-btn-txt{font-size:13px;color:var(--purple2);font-weight:500}
+  .ai-btn.teal{background:rgba(6,182,212,.15);border-color:rgba(6,182,212,.3)}
+  .ai-btn.teal svg,.ai-btn.teal .ai-btn-txt{stroke:var(--teal);color:var(--teal)}
+  .ai-btn.pink{background:rgba(236,72,153,.15);border-color:rgba(236,72,153,.3)}
+  .ai-btn.pink svg,.ai-btn.pink .ai-btn-txt{stroke:var(--pink);color:var(--pink)}
+  .export-btn{margin:0 16px 20px;width:calc(100% - 32px);background:var(--green);border:none;border-radius:14px;padding:16px;font-size:14px;font-weight:800;color:#fff;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s}
+  .export-btn:active{transform:scale(.97)}
+  .export-btn svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;flex-shrink:0}
+
+  /* EXPORT SUCCESS */
+  #success .content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
+  .success-icon{width:100px;height:100px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin-bottom:28px}
+  .success-icon svg{width:52px;height:52px;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round}
+  .success-title{font-size:26px;font-weight:800;color:var(--text);margin-bottom:10px}
+  .success-sub{font-size:14px;color:var(--text2);margin-bottom:40px;line-height:1.7}
+  .share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-bottom:32px}
+  .share-btn{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border:none;transition:background .2s}
+  .share-btn:active{background:var(--bg4)}
+  .share-btn svg{width:28px;height:28px}
+  .share-btn span{font-size:11px;color:var(--text2)}
+  .nova-btn{background:var(--purple);border:none;border-radius:14px;padding:16px 40px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;width:100%}
+
+  /* BOTTOM NAV */
+  .bottom-nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);padding:8px 0 max(env(safe-area-inset-bottom),8px);flex-shrink:0}
+  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px 0}
+  .nav-item svg{width:24px;height:24px;fill:none;stroke:var(--border);stroke-width:2;stroke-linecap:round;transition:stroke .2s}
+  .nav-item.active svg{stroke:var(--gold)}
+  .nav-item span{font-size:10px;color:var(--text3);transition:color .2s}
+  .nav-item.active span{color:var(--gold)}
+
+  /* LOADING OVERLAY */
+  .loading{position:fixed;inset:0;background:rgba(10,10,20,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+  .loading.visible{opacity:1;pointer-events:all}
+  .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-txt{font-size:14px;color:var(--text2)}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg4);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:200}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 <div class="app">
-<div class="screen" id="home">
-<div class="topbar"><div class="topbar-logo">ADA</div><button class="topbar-action">&#10022; Pro</button></div>
-<div class="content">
-<p class="home-tagline">Qualquer um pode criar um video viral</p>
-<button class="rec-btn" onclick="goTo('camera','home')">
-<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="#fff"/></svg>
-<span class="rec-btn-lbl">GRAVAR</span>
-</button>
-<button class="import-btn" onclick="simularImport()">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l3 3 3-3M12 15V8"/></svg>
-Importar da galeria
-</button>
-<div class="stats">
-<div class="stat"><div class="stat-val" id="stat-videos">0</div><div class="stat-lbl">Videos</div></div>
-<div class="stat"><div class="stat-val" id="stat-exports">0/3</div><div class="stat-lbl">Exports hoje</div></div>
-<div class="stat"><div class="stat-val">Free</div><div class="stat-lbl">Plano</div></div>
-</div>
-<p class="recent-title">Projetos recentes</p>
-<div class="empty-state">Nenhum video ainda.<br>Grave ou importe o seu primeiro!</div>
-</div>
-<nav class="bottom-nav">
-<button class="nav-item active" onclick="goTo('home')"><svg viewBox="0 0 24 24"><path d="M3 12L12 4l9 8"/><path d="M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg><span>Inicio</span></button>
-<button class="nav-item" onclick="goTo('editor','home')"><svg viewBox="0 0 24 24"><path d="M6 3l12 9-12 9V3z"/></svg><span>Editor</span></button>
-<button class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></button>
-</nav>
+
+  <!-- HOME -->
+  <div class="screen" id="home">
+    <div class="topbar">
+      <div class="topbar-logo">ADA</div>
+      <button class="topbar-action">✦ Pro</button>
+    </div>
+    <div class="content">
+      <p class="home-tagline">Qualquer um pode criar um vídeo viral</p>
+      <button class="rec-btn" onclick="goTo('camera','home')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="#fff"/></svg>
+        <span class="rec-btn-lbl">GRAVAR</span>
+      </button>
+      <label class="import-btn" for="galeria-input">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l3 3 3-3M12 15V8"/></svg>
+        Importar da galeria
+      </label>
+      <input id="galeria-input" type="file" accept="video/*" style="display:none" onchange="importarGaleria(this)">
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="stat-videos">0</div><div class="stat-lbl">Vídeos</div></div>
+        <div class="stat"><div class="stat-val" id="stat-exports">0/3</div><div class="stat-lbl">Exports hoje</div></div>
+        <div class="stat"><div class="stat-val">Free</div><div class="stat-lbl">Plano</div></div>
+      </div>
+      <p class="recent-title">Projetos recentes</p>
+      <div class="empty-state">Nenhum vídeo ainda.<br>Grave ou importe o seu primeiro!</div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="goTo('home')">
+        <svg viewBox="0 0 24 24"><path d="M3 12L12 4l9 8"/><path d="M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        <span>Início</span>
+      </button>
+      <button class="nav-item" onclick="goTo('editor','home')">
+        <svg viewBox="0 0 24 24"><path d="M6 3l12 9-12 9V3z"/></svg>
+        <span>Editor</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span>Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- CAMERA -->
+  <div class="screen hidden" id="camera">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack('home')">←</button>
+      <span class="topbar-title">Câmera</span>
+      <button class="topbar-action" id="cam-flip-btn">↻ Virar</button>
+    </div>
+    <div class="preview">
+      <div class="preview-placeholder" id="preview-ph">
+        <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.876V15.12a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+        <span>Toque no botão para gravar</span>
+      </div>
+      <video id="cam-video" style="width:100%;height:100%;object-fit:cover;display:none" autoplay muted playsinline></video>
+      <div class="cam-timer" id="cam-timer">
+        <div class="cam-dot"></div>
+        <span class="cam-timer-txt" id="cam-time">00:00</span>
+      </div>
+    </div>
+    <p class="cam-hint" id="cam-hint">Toque para iniciar — toque novamente para parar</p>
+    <div class="cam-controls">
+      <button class="cam-side" onclick="goBack('home')">✕</button>
+      <button class="cam-rec" id="cam-rec" onclick="toggleGravacao()">
+        <div class="cam-rec-inner" id="cam-inner"></div>
+      </button>
+      <button class="cam-side" onclick="virarCamera()">↻</button>
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="screen hidden" id="editor">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack('home')">←</button>
+      <span class="topbar-title">Editor</span>
+      <button class="topbar-action" onclick="showToast('Projeto salvo!')">Salvar</button>
+    </div>
+    <div class="ev-preview">
+      <button class="play-circle" onclick="togglePlay()">
+        <svg viewBox="0 0 24 24" id="play-icon"><path d="M5 3l14 9-14 9V3z"/></svg>
+      </button>
+      <span class="ev-duration" id="ev-dur">00:42</span>
+    </div>
+    <div class="ev-timeline">
+      <div class="ev-clip" id="clip1">✂ Clipe 1 — 00:42</div>
+    </div>
+    <div class="ev-tabs">
+      <button class="ev-tab active" onclick="setTab(this,'p-corte')">
+        <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
+        <span>Corte</span>
+      </button>
+      <button class="ev-tab" onclick="setTab(this,'p-legenda')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>Legendas</span>
+      </button>
+      <button class="ev-tab" onclick="setTab(this,'p-voz')">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+        <span>Voz</span>
+      </button>
+      <button class="ev-tab" onclick="setTab(this,'p-musica')">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Música</span>
+      </button>
+    </div>
+
+    <div class="ev-panel" id="p-corte">
+      <p class="panel-title">Corte automático por silêncio</p>
+      <p class="panel-sub">A IA detecta silêncios e partes sem fala, deixando só o que importa.</p>
+      <button class="ai-btn" onclick="simularIA('Detectando silêncios...')">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span class="ai-btn-txt">Detectar silêncios com IA</span>
+      </button>
+      <button class="ai-btn" onclick="simularIA('Selecionando melhores momentos...')">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span class="ai-btn-txt">Selecionar melhores 30 segundos</span>
+      </button>
+    </div>
+
+    <div class="ev-panel" id="p-legenda" style="display:none">
+      <p class="panel-title">Legendas automáticas</p>
+      <p class="panel-sub">OpenAI Whisper transcreve a fala e gera legendas sincronizadas no estilo viral.</p>
+      <button class="ai-btn" onclick="simularIA('Transcrevendo áudio com Whisper AI...')">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span class="ai-btn-txt">Gerar legendas com IA</span>
+      </button>
+      <button class="ai-btn teal" onclick="simularIA('Gerando ganchos virais com GPT-4o...')">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span class="ai-btn-txt">Sugerir ganchos virais (GPT-4o)</span>
+      </button>
+    </div>
+
+    <div class="ev-panel" id="p-voz" style="display:none">
+      <p class="panel-title">Voz &amp; Dublagem</p>
+      <p class="panel-sub">Clone qualquer voz com 30–60s de amostra. Duble automaticamente para outro idioma.</p>
+      <button class="ai-btn" onclick="simularIA('Processando amostra de voz...')">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>
+        <span class="ai-btn-txt">Clonar voz (ElevenLabs)</span>
+      </button>
+      <button class="ai-btn teal" onclick="simularIA('Dublando para inglês com ElevenLabs...')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+        <span class="ai-btn-txt">Dublar para inglês</span>
+      </button>
+      <button class="ai-btn pink" onclick="simularIA('Dublando para espanhol...')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+        <span class="ai-btn-txt">Dublar para espanhol</span>
+      </button>
+    </div>
+
+    <div class="ev-panel" id="p-musica" style="display:none">
+      <p class="panel-title">Trilha Sonora</p>
+      <p class="panel-sub">Músicas livres de direitos, sincronizadas automaticamente com o ritmo do vídeo.</p>
+      <button class="ai-btn" onclick="simularIA('Carregando biblioteca de músicas...')">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span class="ai-btn-txt">Biblioteca de músicas</span>
+      </button>
+      <button class="ai-btn teal" onclick="simularIA('Sincronizando trilha com o vídeo...')">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span class="ai-btn-txt">Auto-sincronizar com IA</span>
+      </button>
+    </div>
+
+    <button class="export-btn" onclick="exportar()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      EXPORTAR VÍDEO
+    </button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="screen hidden" id="success">
+    <div class="content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:10px">Vídeo pronto!</h2>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:36px;line-height:1.7">Seu vídeo foi exportado.<br>Compartilhe direto nas redes.</p>
+      <div class="share-grid">
+        <button class="share-btn" onclick="showToast('Abrindo TikTok...')">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.56a8.17 8.17 0 004.79 1.54V6.65a4.85 4.85 0 01-1.02.04z" fill="#F8F8FF"/></svg>
+          <span>TikTok</span>
+        </button>
+        <button class="share-btn" onclick="showToast('Abrindo Instagram...')">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="#F8F8FF" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke="#F8F8FF" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="#F8F8FF"/></svg>
+          <span>Reels</span>
+        </button>
+        <button class="share-btn" onclick="showToast('Abrindo YouTube...')">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" stroke="#F8F8FF" stroke-width="1.5"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" stroke="#F8F8FF" stroke-width="1.5" fill="none"/></svg>
+          <span>Shorts</span>
+        </button>
+      </div>
+      <button class="nova-btn" onclick="novoVideo()">+ Criar novo vídeo</button>
+    </div>
+  </div>
+
 </div>
 
-<div class="screen hidden" id="camera">
-<div class="topbar">
-<button class="topbar-back" onclick="goBack('home')">&#8592;</button>
-<span class="topbar-title">Camera</span>
-<button class="topbar-action">&#8635; Virar</button>
-</div>
-<div class="preview">
-<div class="preview-placeholder" id="preview-ph">
-<svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.876V15.12a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
-<span>Toque no botao para gravar</span>
-</div>
-<video id="cam-video" style="width:100%;height:100%;object-fit:cover;display:none" autoplay muted playsinline></video>
-<div class="cam-timer" id="cam-timer"><div class="cam-dot"></div><span class="cam-timer-txt" id="cam-time">00:00</span></div>
-</div>
-<p class="cam-hint" id="cam-hint">Toque para iniciar - toque novamente para parar</p>
-<div class="cam-controls">
-<button class="cam-side" onclick="goBack('home')">&#10005;</button>
-<button class="cam-rec" id="cam-rec" onclick="toggleGravacao()"><div class="cam-rec-inner" id="cam-inner"></div></button>
-<button class="cam-side" onclick="virarCamera()">&#8635;</button>
-</div>
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <span class="loading-txt" id="loading-txt">Processando com IA...</span>
 </div>
 
-<div class="screen hidden" id="editor">
-<div class="topbar">
-<button class="topbar-back" onclick="goBack('home')">&#8592;</button>
-<span class="topbar-title">Editor</span>
-<button class="topbar-action" onclick="showToast('Projeto salvo!')">Salvar</button>
-</div>
-<div class="ev-preview">
-<button class="play-circle" onclick="togglePlay()"><svg viewBox="0 0 24 24" id="play-icon"><path d="M5 3l14 9-14 9V3z"/></svg></button>
-<span class="ev-duration" id="ev-dur">00:42</span>
-</div>
-<div class="ev-timeline"><div class="ev-clip" id="clip1">Clipe 1 - 00:42</div></div>
-<div class="ev-tabs">
-<button class="ev-tab active" onclick="setTab(this,'p-corte')"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg><span>Corte</span></button>
-<button class="ev-tab" onclick="setTab(this,'p-legenda')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Legendas</span></button>
-<button class="ev-tab" onclick="setTab(this,'p-voz')"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg><span>Voz</span></button>
-<button class="ev-tab" onclick="setTab(this,'p-musica')"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Musica</span></button>
-</div>
-<div class="ev-panel" id="p-corte">
-<p class="panel-title">Corte automatico por silencio</p>
-<p class="panel-sub">A IA detecta silencias e partes sem fala, deixando so o que importa.</p>
-<button class="ai-btn" onclick="simularIA('Detectando silencias...')"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="ai-btn-txt">Detectar silencias com IA</span></button>
-<button class="ai-btn" onclick="simularIA('Selecionando melhores momentos...')"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="ai-btn-txt">Selecionar melhores 30 segundos</span></button>
-</div>
-<div class="ev-panel" id="p-legenda" style="display:none">
-<p class="panel-title">Legendas automaticas</p>
-<p class="panel-sub">OpenAI Whisper transcreve a fala e gera legendas sincronizadas no estilo viral.</p>
-<button class="ai-btn" onclick="simularIA('Transcrevendo audio com Whisper AI...')"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="ai-btn-txt">Gerar legendas com IA</span></button>
-<button class="ai-btn teal" onclick="simularIA('Gerando ganchos virais com GPT-4o...')"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="ai-btn-txt">Sugerir ganchos virais (GPT-4o)</span></button>
-</div>
-<div class="ev-panel" id="p-voz" style="display:none">
-<p class="panel-title">Voz e Dublagem</p>
-<p class="panel-sub">Clone qualquer voz com 30-60s de amostra. Duble para outro idioma.</p>
-<button class="ai-btn" onclick="simularIA('Processando amostra de voz...')"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg><span class="ai-btn-txt">Clonar voz (ElevenLabs)</span></button>
-<button class="ai-btn teal" onclick="simularIA('Dublando para ingles...')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20"/></svg><span class="ai-btn-txt">Dublar para ingles</span></button>
-</div>
-<div class="ev-panel" id="p-musica" style="display:none">
-<p class="panel-title">Trilha Sonora</p>
-<p class="panel-sub">Musicas livres de direitos, sincronizadas com o ritmo do video.</p>
-<button class="ai-btn" onclick="simularIA('Carregando musicas...')"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="ai-btn-txt">Biblioteca de musicas</span></button>
-<button class="ai-btn teal" onclick="simularIA('Sincronizando trilha...')"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="ai-btn-txt">Auto-sincronizar com IA</span></button>
-</div>
-<button class="export-btn" onclick="exportar()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>EXPORTAR VIDEO</button>
-</div>
-
-<div class="screen hidden" id="success">
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
-<div style="width:100px;height:100px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin-bottom:28px">
-<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-</div>
-<h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:10px">Video pronto!</h2>
-<p style="font-size:14px;color:var(--text2);margin-bottom:36px;line-height:1.7">Seu video foi exportado.<br>Compartilhe direto nas redes.</p>
-<div class="share-grid">
-<button class="share-btn" onclick="showToast('Abrindo TikTok...')"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.56a8.17 8.17 0 004.79 1.54V6.65a4.85 4.85 0 01-1.02.04z" fill="#F8F8FF"/></svg><span>TikTok</span></button>
-<button class="share-btn" onclick="showToast('Abrindo Instagram...')"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="#F8F8FF" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke="#F8F8FF" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="#F8F8FF"/></svg><span>Reels</span></button>
-<button class="share-btn" onclick="showToast('Abrindo YouTube...')"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" stroke="#F8F8FF" stroke-width="1.5"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" stroke="#F8F8FF" stroke-width="1.5" fill="none"/></svg><span>Shorts</span></button>
-</div>
-<button class="nova-btn" onclick="novoVideo()">+ Criar novo video</button>
-</div>
-</div>
-</div>
-<div class="loading" id="loading"><div class="spinner"></div><span class="loading-txt" id="loading-txt">Processando com IA...</span></div>
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
+
 <script>
-var currentScreen='home',prevScreen=null,gravando=false,recTimer=null,recSec=0,playing=false,playTimer=null,stream=null,facingMode='environment';
-var exportCount=parseInt(localStorage.getItem('ada_exports')||'0');
-var videoCount=parseInt(localStorage.getItem('ada_videos')||'0');
-var hoje=new Date().toDateString();
-if(localStorage.getItem('ada_day')!==hoje){localStorage.setItem('ada_day',hoje);exportCount=0;localStorage.setItem('ada_exports','0');}
-function updateStats(){document.getElementById('stat-exports').textContent=exportCount+'/3';document.getElementById('stat-videos').textContent=videoCount;}
+var currentScreen = 'home';
+var prevScreen = null;
+var gravando = false;
+var recTimer = null;
+var recSec = 0;
+var playing = false;
+var playTimer = null;
+var exportCount = parseInt(localStorage.getItem('ada_exports')||'0');
+var videoCount = parseInt(localStorage.getItem('ada_videos')||'0');
+var stream = null;
+var facingMode = 'environment';
+
+function updateStats(){
+  document.getElementById('stat-exports').textContent = exportCount+'/3';
+  document.getElementById('stat-videos').textContent = videoCount;
+}
 updateStats();
-function goTo(id,from){if(id===currentScreen)return;var curr=document.getElementById(currentScreen),next=document.getElementById(id);curr.classList.add('slide-left');next.classList.remove('hidden');setTimeout(function(){curr.classList.add('hidden');curr.classList.remove('slide-left');},300);prevScreen=currentScreen;currentScreen=id;if(id==='camera')startCamera();else stopCamera();}
-function goBack(id){var curr=document.getElementById(currentScreen),next=document.getElementById(id);curr.classList.add('hidden');next.classList.remove('hidden','slide-left');prevScreen=currentScreen;currentScreen=id;stopCamera();}
-async function startCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode},audio:true});var v=document.getElementById('cam-video');v.srcObject=stream;v.style.display='block';document.getElementById('preview-ph').style.display='none';}catch(e){showToast('Use HTTPS para acessar a camera');}}
-function stopCamera(){if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}var v=document.getElementById('cam-video');v.style.display='none';v.srcObject=null;document.getElementById('preview-ph').style.display='flex';if(gravando)pararGravacao();}
-function virarCamera(){facingMode=facingMode==='environment'?'user':'environment';if(stream){stopCamera();startCamera();}}
-function toggleGravacao(){if(!gravando)iniciarGravacao();else{pararGravacao();goTo('editor','camera');}}
-function iniciarGravacao(){gravando=true;recSec=0;document.getElementById('cam-rec').classList.add('on');document.getElementById('cam-timer').classList.add('visible');document.getElementById('cam-hint').textContent='Gravando - toque novamente para parar';recTimer=setInterval(function(){recSec++;var m=String(Math.floor(recSec/60)).padStart(2,'0'),s=String(recSec%60).padStart(2,'0');document.getElementById('cam-time').textContent=m+':'+s;document.getElementById('ev-dur').textContent=m+':'+s;document.getElementById('clip1').textContent='Clipe 1 - '+m+':'+s;},1000);}
-function pararGravacao(){gravando=false;clearInterval(recTimer);document.getElementById('cam-rec').classList.remove('on');document.getElementById('cam-timer').classList.remove('visible');document.getElementById('cam-hint').textContent='Toque para iniciar - toque novamente para parar';document.getElementById('cam-time').textContent='00:00';}
-function simularImport(){showToast('Selecionando da galeria...');setTimeout(function(){goTo('editor','home');},800);}
-function setTab(btn,panelId){document.querySelectorAll('.ev-tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.ev-panel').forEach(function(p){p.style.display='none';});btn.classList.add('active');document.getElementById(panelId).style.display='block';}
-function togglePlay(){playing=!playing;document.getElementById('play-icon').innerHTML=playing?'<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>':'<path d="M5 3l14 9-14 9V3z"/>';if(playing){var dur=recSec||42,cur=0;playTimer=setInterval(function(){cur++;if(cur>=dur){clearInterval(playTimer);playing=false;document.getElementById('play-icon').innerHTML='<path d="M5 3l14 9-14 9V3z"/>';}},1000);}else clearInterval(playTimer);}
-function simularIA(msg){var l=document.getElementById('loading');document.getElementById('loading-txt').textContent=msg;l.classList.add('visible');setTimeout(function(){l.classList.remove('visible');showToast('Concluido!');},2200);}
-function exportar(){if(exportCount>=3){showToast('Limite atingido. Upgrade para Pro!');return;}simularIA('Exportando em 9:16 para Reels...');setTimeout(function(){exportCount++;videoCount++;localStorage.setItem('ada_exports',exportCount);localStorage.setItem('ada_videos',videoCount);updateStats();goTo('success','editor');},2400);}
-function novoVideo(){goTo('home','success');}
-function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+function goTo(id, from){
+  if(id === currentScreen) return;
+  var curr = document.getElementById(currentScreen);
+  var next = document.getElementById(id);
+  curr.classList.remove('active');
+  curr.classList.add('slide-left');
+  next.classList.remove('hidden');
+  setTimeout(function(){
+    curr.classList.add('hidden');
+    curr.classList.remove('slide-left');
+  },300);
+  prevScreen = currentScreen;
+  currentScreen = id;
+  if(id === 'camera') startCamera();
+  if(id !== 'camera') stopCamera();
+}
+
+function goBack(id){
+  var curr = document.getElementById(currentScreen);
+  var next = document.getElementById(id);
+  curr.classList.add('hidden');
+  next.classList.remove('hidden','slide-left');
+  prevScreen = currentScreen;
+  currentScreen = id;
+  stopCamera();
+}
+
+async function startCamera(){
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode},audio:true});
+    var v = document.getElementById('cam-video');
+    v.srcObject = stream;
+    v.style.display = 'block';
+    document.getElementById('preview-ph').style.display = 'none';
+  } catch(e){
+    showToast('Use HTTPS para acessar a câmera');
+  }
+}
+
+function stopCamera(){
+  if(stream){ stream.getTracks().forEach(function(t){t.stop()}); stream=null; }
+  var v = document.getElementById('cam-video');
+  v.style.display='none'; v.srcObject=null;
+  document.getElementById('preview-ph').style.display='flex';
+  if(gravando) pararGravacao();
+}
+
+function virarCamera(){
+  facingMode = facingMode==='environment'?'user':'environment';
+  if(stream){ stopCamera(); startCamera(); }
+}
+
+function toggleGravacao(){
+  if(!gravando){ iniciarGravacao(); } else { pararGravacao(); goTo('editor','camera'); }
+}
+
+function iniciarGravacao(){
+  gravando=true; recSec=0;
+  document.getElementById('cam-rec').classList.add('on');
+  document.getElementById('cam-timer').classList.add('visible');
+  document.getElementById('cam-hint').textContent = 'Gravando — toque novamente para parar';
+  recTimer = setInterval(function(){
+    recSec++;
+    var m=String(Math.floor(recSec/60)).padStart(2,'0');
+    var s=String(recSec%60).padStart(2,'0');
+    document.getElementById('cam-time').textContent=m+':'+s;
+    document.getElementById('ev-dur').textContent=m+':'+s;
+    document.getElementById('clip1').textContent='✂ Clipe 1 — '+m+':'+s;
+  },1000);
+}
+
+function pararGravacao(){
+  gravando=false;
+  clearInterval(recTimer);
+  document.getElementById('cam-rec').classList.remove('on');
+  document.getElementById('cam-timer').classList.remove('visible');
+  document.getElementById('cam-hint').textContent='Toque para iniciar — toque novamente para parar';
+  document.getElementById('cam-time').textContent='00:00';
+}
+
+function importarGaleria(input){
+  var file = input.files[0];
+  if(!file) return;
+  var url = URL.createObjectURL(file);
+  var evPreview = document.querySelector('#editor .ev-preview');
+  var existing = document.getElementById('ev-video');
+  if(existing) existing.remove();
+  var vid = document.createElement('video');
+  vid.id = 'ev-video';
+  vid.src = url;
+  vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.7';
+  vid.controls = false;
+  vid.loop = true;
+  vid.muted = true;
+  vid.play();
+  evPreview.appendChild(vid);
+  vid.onloadedmetadata = function(){
+    var m=String(Math.floor(vid.duration/60)).padStart(2,'0');
+    var s=String(Math.floor(vid.duration%60)).padStart(2,'0');
+    document.getElementById('ev-dur').textContent=m+':'+s;
+    document.getElementById('clip1').textContent='✂ Clipe 1 — '+m+':'+s;
+    recSec = Math.floor(vid.duration);
+  };
+  document.getElementById('ev-dur').dataset.filename = file.name;
+  videoCount++;
+  localStorage.setItem('ada_videos', videoCount);
+  updateStats();
+  showToast('Vídeo importado: ' + file.name.substring(0,20));
+  goTo('editor','home');
+  input.value = '';
+}
+
+function setTab(btn, panelId){
+  document.querySelectorAll('.ev-tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.ev-panel').forEach(function(p){p.style.display='none'});
+  btn.classList.add('active');
+  document.getElementById(panelId).style.display='block';
+}
+
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('play-icon').innerHTML = playing
+    ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+    : '<path d="M5 3l14 9-14 9V3z"/>';
+  if(playing){
+    var dur=recSec||42;
+    var cur=0;
+    playTimer=setInterval(function(){
+      cur++;
+      if(cur>=dur){clearInterval(playTimer);playing=false;document.getElementById('play-icon').innerHTML='<path d="M5 3l14 9-14 9V3z"/>';}
+    },1000);
+  } else { clearInterval(playTimer); }
+}
+
+function simularIA(msg){
+  var l=document.getElementById('loading');
+  document.getElementById('loading-txt').textContent=msg;
+  l.classList.add('visible');
+  setTimeout(function(){
+    l.classList.remove('visible');
+    showToast('Concluído!');
+  },2200);
+}
+
+function exportar(){
+  if(exportCount>=3){ showToast('Limite atingido. Upgrade para Pro!'); return; }
+  simularIA('Exportando em 9:16 para Reels...');
+  setTimeout(function(){
+    exportCount++;
+    videoCount++;
+    localStorage.setItem('ada_exports',exportCount);
+    localStorage.setItem('ada_videos',videoCount);
+    updateStats();
+    goTo('success','editor');
+  },2400);
+}
+
+function novoVideo(){
+  goTo('home','success');
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},2500);
+}
+
+var hoje=new Date().toDateString();
+if(localStorage.getItem('ada_day')!==hoje){
+  localStorage.setItem('ada_day',hoje);
+  exportCount=0; localStorage.setItem('ada_exports','0');
+}
+updateStats();
 </script>
 </body>
-                                                                                                                               </html>
+</html>
