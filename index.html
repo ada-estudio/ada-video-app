@@ -59,16 +59,16 @@
   .cam-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
   .cam-timer-txt{color:#fff;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
-  .cam-controls{padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg)}
+  .cam-hint{text-align:center;padding:8px 24px;font-size:12px;color:var(--text3);flex-shrink:0}
+  .cam-finalizar{display:none;margin:0 24px 8px;background:var(--red);border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:#fff;letter-spacing:1px;cursor:pointer;width:calc(100% - 48px);animation:pulse-btn .8s infinite;flex-shrink:0}
+  .cam-finalizar.visible{display:block}
+  @keyframes pulse-btn{0%,100%{opacity:1}50%{opacity:.8}}
+  .cam-controls{padding:20px 40px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg)}
   .cam-side{width:50px;height:50px;border-radius:50%;background:var(--bg4);border:none;color:var(--text);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
   .cam-rec{width:80px;height:80px;border-radius:50%;background:none;border:4px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
   .cam-rec.on{border-color:var(--red)}
   .cam-rec-inner{width:60px;height:60px;border-radius:50%;background:var(--red);transition:all .25s cubic-bezier(.4,0,.2,1)}
   .cam-rec.on .cam-rec-inner{border-radius:10px;width:30px;height:30px}
-  .cam-hint{text-align:center;padding:0 0 8px;font-size:12px;color:var(--text3)}
-  .cam-finalizar{display:none;margin:0 24px 8px;background:var(--red);border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:#fff;letter-spacing:1px;cursor:pointer;width:calc(100% - 48px);animation:pulse-btn .8s infinite}
-  .cam-finalizar.visible{display:block}
-  @keyframes pulse-btn{0%,100%{opacity:1}50%{opacity:.8}}
 
   /* EDITOR */
   #editor .ev-preview{height:210px;background:#000;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
@@ -100,11 +100,6 @@
   .export-btn svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;flex-shrink:0}
 
   /* EXPORT SUCCESS */
-  #success .content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
-  .success-icon{width:100px;height:100px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin-bottom:28px}
-  .success-icon svg{width:52px;height:52px;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round}
-  .success-title{font-size:26px;font-weight:800;color:var(--text);margin-bottom:10px}
-  .success-sub{font-size:14px;color:var(--text2);margin-bottom:40px;line-height:1.7}
   .share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-bottom:32px}
   .share-btn{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border:none;transition:background .2s}
   .share-btn:active{background:var(--bg4)}
@@ -120,7 +115,7 @@
   .nav-item span{font-size:10px;color:var(--text3);transition:color .2s}
   .nav-item.active span{color:var(--gold)}
 
-  /* LOADING OVERLAY */
+  /* LOADING */
   .loading{position:fixed;inset:0;background:rgba(10,10,20,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
   .loading.visible{opacity:1;pointer-events:all}
   .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}
@@ -181,7 +176,7 @@
     <div class="topbar">
       <button class="topbar-back" onclick="goBack('home')">←</button>
       <span class="topbar-title">Câmera</span>
-      <button class="topbar-action" id="cam-flip-btn">↻ Virar</button>
+      <button class="topbar-action" onclick="virarCamera()">↻ Virar</button>
     </div>
     <div class="preview">
       <div class="preview-placeholder" id="preview-ph">
@@ -199,7 +194,7 @@
     <div class="cam-controls">
       <button class="cam-side" onclick="goBack('home')">✕</button>
       <button class="cam-rec" id="cam-rec" onclick="toggleGravacao()">
-        <div class="cam-rec-inner" id="cam-inner"></div>
+        <div class="cam-rec-inner"></div>
       </button>
       <button class="cam-side" onclick="virarCamera()">↻</button>
     </div>
@@ -239,7 +234,6 @@
         <span>Música</span>
       </button>
     </div>
-
     <div class="ev-panel" id="p-corte">
       <p class="panel-title">Corte automático por silêncio</p>
       <p class="panel-sub">A IA detecta silêncios e partes sem fala, deixando só o que importa.</p>
@@ -252,7 +246,6 @@
         <span class="ai-btn-txt">Selecionar melhores 30 segundos</span>
       </button>
     </div>
-
     <div class="ev-panel" id="p-legenda" style="display:none">
       <p class="panel-title">Legendas automáticas</p>
       <p class="panel-sub">OpenAI Whisper transcreve a fala e gera legendas sincronizadas no estilo viral.</p>
@@ -265,7 +258,6 @@
         <span class="ai-btn-txt">Sugerir ganchos virais (GPT-4o)</span>
       </button>
     </div>
-
     <div class="ev-panel" id="p-voz" style="display:none">
       <p class="panel-title">Voz &amp; Dublagem</p>
       <p class="panel-sub">Clone qualquer voz com 30–60s de amostra. Duble automaticamente para outro idioma.</p>
@@ -282,7 +274,6 @@
         <span class="ai-btn-txt">Dublar para espanhol</span>
       </button>
     </div>
-
     <div class="ev-panel" id="p-musica" style="display:none">
       <p class="panel-title">Trilha Sonora</p>
       <p class="panel-sub">Músicas livres de direitos, sincronizadas automaticamente com o ritmo do vídeo.</p>
@@ -295,7 +286,6 @@
         <span class="ai-btn-txt">Auto-sincronizar com IA</span>
       </button>
     </div>
-
     <button class="export-btn" onclick="exportar()">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       EXPORTAR VÍDEO
@@ -304,11 +294,11 @@
 
   <!-- SUCCESS -->
   <div class="screen hidden" id="success">
-    <div class="content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+      <div style="width:100px;height:100px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;margin-bottom:28px">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       </div>
-      <h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:10px">Vídeo pronto!</h2>
+      <h2 style="font-size:26px;font-weight:800;margin-bottom:10px">Vídeo pronto!</h2>
       <p style="font-size:14px;color:var(--text2);margin-bottom:36px;line-height:1.7">Seu vídeo foi exportado.<br>Compartilhe direto nas redes.</p>
       <div class="share-grid">
         <button class="share-btn" onclick="showToast('Abrindo TikTok...')">
@@ -350,7 +340,7 @@ var playTimer = null;
 var exportCount = parseInt(localStorage.getItem('ada_exports')||'0');
 var videoCount = parseInt(localStorage.getItem('ada_videos')||'0');
 var stream = null;
-var facingMode = 'environment';
+var facingMode = 'user';
 
 function updateStats(){
   document.getElementById('stat-exports').textContent = exportCount+'/3';
@@ -362,7 +352,6 @@ function goTo(id, from){
   if(id === currentScreen) return;
   var curr = document.getElementById(currentScreen);
   var next = document.getElementById(id);
-  curr.classList.remove('active');
   curr.classList.add('slide-left');
   next.classList.remove('hidden');
   setTimeout(function(){
@@ -411,7 +400,7 @@ function virarCamera(){
 }
 
 function toggleGravacao(){
-  if(!gravando){ iniciarGravacao(); } else { pararGravacao(); goTo('editor','camera'); }
+  if(!gravando){ iniciarGravacao(); } else { finalizarGravacao(); }
 }
 
 function iniciarGravacao(){
@@ -452,7 +441,6 @@ function importarGaleria(input){
   var file = input.files[0];
   if(!file) return;
   var url = URL.createObjectURL(file);
-  // Mostra vídeo no preview do editor
   var evPreview = document.querySelector('#editor .ev-preview');
   var existing = document.getElementById('ev-video');
   if(existing) existing.remove();
@@ -465,7 +453,6 @@ function importarGaleria(input){
   vid.muted = true;
   vid.play();
   evPreview.appendChild(vid);
-  // Atualiza duração
   vid.onloadedmetadata = function(){
     var m=String(Math.floor(vid.duration/60)).padStart(2,'0');
     var s=String(Math.floor(vid.duration%60)).padStart(2,'0');
@@ -473,9 +460,77 @@ function importarGaleria(input){
     document.getElementById('clip1').textContent='✂ Clipe 1 — '+m+':'+s;
     recSec = Math.floor(vid.duration);
   };
-  // Guarda nome do arquivo
   document.getElementById('ev-dur').dataset.filename = file.name;
   videoCount++;
   localStorage.setItem('ada_videos', videoCount);
   updateStats();
-  showToast('Vídeo importado: ' + file.na
+  showToast('Vídeo importado: ' + file.name.substring(0,20));
+  goTo('editor','home');
+  input.value = '';
+}
+
+function setTab(btn, panelId){
+  document.querySelectorAll('.ev-tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.ev-panel').forEach(function(p){p.style.display='none'});
+  btn.classList.add('active');
+  document.getElementById(panelId).style.display='block';
+}
+
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('play-icon').innerHTML = playing
+    ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+    : '<path d="M5 3l14 9-14 9V3z"/>';
+  if(playing){
+    var dur=recSec||42;
+    var cur=0;
+    playTimer=setInterval(function(){
+      cur++;
+      if(cur>=dur){clearInterval(playTimer);playing=false;document.getElementById('play-icon').innerHTML='<path d="M5 3l14 9-14 9V3z"/>';}
+    },1000);
+  } else { clearInterval(playTimer); }
+}
+
+function simularIA(msg){
+  var l=document.getElementById('loading');
+  document.getElementById('loading-txt').textContent=msg;
+  l.classList.add('visible');
+  setTimeout(function(){
+    l.classList.remove('visible');
+    showToast('Concluído!');
+  },2200);
+}
+
+function exportar(){
+  if(exportCount>=3){ showToast('Limite atingido. Upgrade para Pro!'); return; }
+  simularIA('Exportando em 9:16 para Reels...');
+  setTimeout(function(){
+    exportCount++;
+    videoCount++;
+    localStorage.setItem('ada_exports',exportCount);
+    localStorage.setItem('ada_videos',videoCount);
+    updateStats();
+    goTo('success','editor');
+  },2400);
+}
+
+function novoVideo(){
+  goTo('home','success');
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},2500);
+}
+
+var hoje=new Date().toDateString();
+if(localStorage.getItem('ada_day')!==hoje){
+  localStorage.setItem('ada_day',hoje);
+  exportCount=0; localStorage.setItem('ada_exports','0');
+}
+updateStats();
+</script>
+</body>
+</html>
