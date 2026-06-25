@@ -341,6 +341,9 @@ var exportCount = parseInt(localStorage.getItem('ada_exports')||'0');
 var videoCount = parseInt(localStorage.getItem('ada_videos')||'0');
 var stream = null;
 var facingMode = 'user';
+var mediaRecorder = null;
+var recordedChunks = [];
+var recordedUrl = null;
 
 function updateStats(){
   document.getElementById('stat-exports').textContent = exportCount+'/3';
@@ -405,6 +408,15 @@ function toggleGravacao(){
 
 function iniciarGravacao(){
   gravando=true; recSec=0;
+  recordedChunks = [];
+  // Iniciar MediaRecorder para capturar o vídeo de verdade
+  if(stream && window.MediaRecorder){
+    try {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = function(e){ if(e.data.size>0) recordedChunks.push(e.data); };
+      mediaRecorder.start();
+    } catch(e){ mediaRecorder = null; }
+  }
   document.getElementById('cam-rec').classList.add('on');
   document.getElementById('cam-timer').classList.add('visible');
   document.getElementById('cam-hint').textContent = 'Gravando...';
@@ -434,7 +446,30 @@ function finalizarGravacao(){
   videoCount++;
   localStorage.setItem('ada_videos', videoCount);
   updateStats();
-  goTo('editor','camera');
+  // Montar vídeo gravado e mostrar no editor
+  if(mediaRecorder && recordedChunks.length > 0){
+    mediaRecorder.stop();
+    mediaRecorder.onstop = function(){
+      if(recordedUrl) URL.revokeObjectURL(recordedUrl);
+      var blob = new Blob(recordedChunks, {type:'video/webm'});
+      recordedUrl = URL.createObjectURL(blob);
+      var evPreview = document.querySelector('#editor .ev-preview');
+      var existing = document.getElementById('ev-video');
+      if(existing) existing.remove();
+      var vid = document.createElement('video');
+      vid.id = 'ev-video';
+      vid.src = recordedUrl;
+      vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9';
+      vid.controls = false;
+      vid.loop = true;
+      vid.muted = true;
+      vid.play();
+      evPreview.appendChild(vid);
+      goTo('editor','camera');
+    };
+  } else {
+    goTo('editor','camera');
+  }
 }
 
 function importarGaleria(input){
