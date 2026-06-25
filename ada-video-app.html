@@ -269,20 +269,27 @@
       </button>
     </div>
     <div class="ev-panel" id="p-voz" style="display:none">
-      <p class="panel-title">Voz &amp; Dublagem</p>
-      <p class="panel-sub">Clone qualquer voz com 30–60s de amostra. Duble automaticamente para outro idioma.</p>
-      <button class="ai-btn" onclick="simularIA('Processando amostra de voz...')">
-        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>
-        <span class="ai-btn-txt">Clonar voz (ElevenLabs)</span>
+      <p class="panel-title">Narração</p>
+      <p class="panel-sub">Grave sua voz sobre o vídeo. O vídeo toca enquanto você fala.</p>
+      <div id="voz-status" style="text-align:center;padding:14px 0;font-size:13px;color:var(--text3)">Pronto para gravar</div>
+      <button class="ai-btn pink" id="btn-narrar" onclick="iniciarNaracao()" style="justify-content:center">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+        <span class="ai-btn-txt">🎙 Gravar narração</span>
       </button>
-      <button class="ai-btn teal" onclick="simularIA('Dublando para inglês com ElevenLabs...')">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
-        <span class="ai-btn-txt">Dublar para inglês</span>
+      <button class="ai-btn" id="btn-parar-voz" onclick="pararNaracao()" style="display:none;justify-content:center;background:rgba(255,59,48,.15);border-color:rgba(255,59,48,.4)">
+        <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        <span class="ai-btn-txt" style="color:var(--red)">⏹ Parar gravação</span>
       </button>
-      <button class="ai-btn pink" onclick="simularIA('Dublando para espanhol...')">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
-        <span class="ai-btn-txt">Dublar para espanhol</span>
-      </button>
+      <div id="voz-acoes" style="display:none;margin-top:4px">
+        <button class="ai-btn teal" onclick="ouvirNaracao()" style="justify-content:center">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span class="ai-btn-txt">▶ Ouvir narração</span>
+        </button>
+        <button class="ai-btn" onclick="descartarNaracao()" style="justify-content:center;background:rgba(255,59,48,.08);border-color:rgba(255,59,48,.2)">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+          <span class="ai-btn-txt" style="color:var(--red)">Descartar narração</span>
+        </button>
+      </div>
     </div>
     <div class="ev-panel" id="p-musica" style="display:none">
       <p class="panel-title">Trilha Sonora</p>
@@ -356,6 +363,12 @@ var recordedChunks = [];
 var recordedUrl = null;
 var trimStart = 0;
 var trimEnd = null;
+var voiceRecorder = null;
+var voiceChunks = [];
+var voiceUrl = null;
+var voiceGravando = false;
+var voiceTimer = null;
+var voiceSec = 0;
 
 function updateStats(){
   document.getElementById('stat-exports').textContent = exportCount+'/3';
@@ -641,6 +654,62 @@ function selecionarMelhores30(){
   vid.currentTime = 0;
   atualizarDurClipe();
   showToast('Primeiros ' + end + 's selecionados ✂');
+}
+
+function iniciarNaracao(){
+  navigator.mediaDevices.getUserMedia({audio:true, video:false})
+    .then(function(micStream){
+      voiceChunks = []; voiceSec = 0; voiceGravando = true;
+      voiceRecorder = new MediaRecorder(micStream);
+      voiceRecorder.ondataavailable = function(e){ if(e.data.size>0) voiceChunks.push(e.data); };
+      voiceRecorder.onstop = function(){
+        micStream.getTracks().forEach(function(t){t.stop();});
+        if(voiceChunks.length > 0){
+          if(voiceUrl) URL.revokeObjectURL(voiceUrl);
+          var blob = new Blob(voiceChunks, {type:'audio/webm'});
+          voiceUrl = URL.createObjectURL(blob);
+          document.getElementById('voz-status').textContent = '✅ Narração gravada (' + voiceSec + 's)';
+          document.getElementById('voz-acoes').style.display = 'block';
+        }
+      };
+      voiceRecorder.start(1000);
+      var vid = document.getElementById('ev-video');
+      if(vid){ vid.currentTime = trimStart||0; vid.muted=false; vid.play(); }
+      document.getElementById('btn-narrar').style.display = 'none';
+      document.getElementById('btn-parar-voz').style.display = 'flex';
+      document.getElementById('voz-acoes').style.display = 'none';
+      document.getElementById('voz-status').textContent = '🔴 Gravando... 0s';
+      voiceTimer = setInterval(function(){
+        voiceSec++;
+        document.getElementById('voz-status').textContent = '🔴 Gravando... ' + voiceSec + 's';
+      }, 1000);
+    })
+    .catch(function(){ showToast('⚠ Permita o microfone nas configurações'); });
+}
+
+function pararNaracao(){
+  voiceGravando = false;
+  clearInterval(voiceTimer);
+  if(voiceRecorder && voiceRecorder.state !== 'inactive') voiceRecorder.stop();
+  var vid = document.getElementById('ev-video');
+  if(vid) vid.pause();
+  document.getElementById('btn-narrar').style.display = 'flex';
+  document.getElementById('btn-parar-voz').style.display = 'none';
+}
+
+function ouvirNaracao(){
+  if(!voiceUrl){ showToast('Nenhuma narração gravada'); return; }
+  var audio = new Audio(voiceUrl);
+  audio.play();
+  showToast('▶ Tocando narração...');
+}
+
+function descartarNaracao(){
+  if(voiceUrl){ URL.revokeObjectURL(voiceUrl); voiceUrl=null; }
+  voiceChunks = [];
+  document.getElementById('voz-status').textContent = 'Pronto para gravar';
+  document.getElementById('voz-acoes').style.display = 'none';
+  showToast('Narração descartada');
 }
 
 function simularIA(msg){
