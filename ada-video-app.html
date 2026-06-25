@@ -213,8 +213,15 @@
       </button>
       <span class="ev-duration" id="ev-dur">00:42</span>
     </div>
-    <div class="ev-timeline">
-      <div class="ev-clip" id="clip1">✂ Clipe 1 — 00:42</div>
+    <div class="ev-timeline" style="flex-direction:column;height:auto;padding:8px 14px;gap:4px">
+      <div style="display:flex;align-items:center;gap:6px;width:100%;height:40px;overflow-x:auto">
+        <div class="ev-clip" id="clip1" style="min-width:150px">✂ Clipe 1 — 00:42</div>
+      </div>
+      <div style="position:relative;height:18px;width:100%;background:rgba(236,72,153,.08);border-radius:6px;overflow:hidden">
+        <div id="voz-track" style="display:none;position:absolute;top:0;height:100%;background:rgba(236,72,153,.5);border-radius:6px;min-width:8px"></div>
+      </div>
+    </div>
+    <div class="ev-timeline-old" style="display:none">
     </div>
     <div class="ev-tabs">
       <button class="ev-tab active" onclick="setTab(this,'p-corte')">
@@ -270,11 +277,21 @@
     </div>
     <div class="ev-panel" id="p-voz" style="display:none">
       <p class="panel-title">Narração</p>
-      <p class="panel-sub">Grave sua voz sobre o vídeo. O vídeo toca enquanto você fala.</p>
-      <div id="voz-status" style="text-align:center;padding:14px 0;font-size:13px;color:var(--text3)">Pronto para gravar</div>
+      <p class="panel-sub">Escolha onde sua voz entra no vídeo, depois grave.</p>
+      <div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;color:var(--text3)">Início da narração</span>
+          <span id="voz-pos-lbl" style="font-size:13px;font-weight:700;color:var(--pink)">0s</span>
+        </div>
+        <input type="range" id="voz-pos" min="0" max="100" value="0" step="1"
+          style="width:100%;accent-color:var(--pink);margin-bottom:4px"
+          oninput="moverPosVoz(this.value)">
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">← Arraste para escolher onde a voz entra</div>
+      </div>
+      <div id="voz-status" style="text-align:center;padding:10px 0;font-size:13px;color:var(--text3)">Pronto para gravar</div>
       <button class="ai-btn pink" id="btn-narrar" onclick="iniciarNaracao()" style="justify-content:center">
         <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 013 3v8a3 3 0 01-6 0V4a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
-        <span class="ai-btn-txt">🎙 Gravar narração</span>
+        <span class="ai-btn-txt">🎙 Gravar a partir daqui</span>
       </button>
       <button class="ai-btn" id="btn-parar-voz" onclick="pararNaracao()" style="display:none;justify-content:center;background:rgba(255,59,48,.15);border-color:rgba(255,59,48,.4)">
         <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
@@ -283,7 +300,7 @@
       <div id="voz-acoes" style="display:none;margin-top:4px">
         <button class="ai-btn teal" onclick="ouvirNaracao()" style="justify-content:center">
           <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span class="ai-btn-txt">▶ Ouvir narração</span>
+          <span class="ai-btn-txt">▶ Ouvir narração no ponto</span>
         </button>
         <button class="ai-btn" onclick="descartarNaracao()" style="justify-content:center;background:rgba(255,59,48,.08);border-color:rgba(255,59,48,.2)">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
@@ -369,6 +386,8 @@ var voiceUrl = null;
 var voiceGravando = false;
 var voiceTimer = null;
 var voiceSec = 0;
+var voiceOffset = 0;
+var voicePlayAudio = null;
 
 function updateStats(){
   document.getElementById('stat-exports').textContent = exportCount+'/3';
@@ -492,6 +511,7 @@ function finalizarGravacao(){
         initTrimUI();
       }
       goTo('editor','camera');
+      setTimeout(initVozSlider, 400);
     };
     mediaRecorder.stop();
   } else {
@@ -522,6 +542,7 @@ function importarGaleria(input){
     document.getElementById('clip1').textContent='✂ Clipe 1 — '+m+':'+s;
     recSec = Math.floor(vid.duration);
     initTrimUI();
+    initVozSlider();
   };
   document.getElementById('ev-dur').dataset.filename = file.name;
   videoCount++;
@@ -547,9 +568,24 @@ function togglePlay(){
       if(trimStart > 0 && vid.currentTime < trimStart) vid.currentTime = trimStart;
       vid.play();
       playing = true;
+      // Sincronizar narração no ponto certo
+      if(voiceUrl){
+        if(voicePlayAudio){ voicePlayAudio.pause(); voicePlayAudio=null; }
+        var curT = vid.currentTime;
+        if(curT <= voiceOffset){
+          var delay = (voiceOffset - curT) * 1000;
+          voicePlayAudio = new Audio(voiceUrl);
+          setTimeout(function(){ if(playing && voicePlayAudio) voicePlayAudio.play(); }, delay);
+        } else if(curT < voiceOffset + voiceSec){
+          voicePlayAudio = new Audio(voiceUrl);
+          voicePlayAudio.currentTime = curT - voiceOffset;
+          voicePlayAudio.play();
+        }
+      }
       vid.ontimeupdate = function(){
         if(trimEnd && vid.currentTime >= trimEnd){
           vid.pause();
+          if(voicePlayAudio){ voicePlayAudio.pause(); voicePlayAudio=null; }
           vid.currentTime = trimStart || 0;
           playing = false;
           document.getElementById('play-icon').innerHTML = '<path d="M5 3l14 9-14 9V3z"/>';
@@ -557,6 +593,7 @@ function togglePlay(){
       };
     } else {
       vid.pause();
+      if(voicePlayAudio){ voicePlayAudio.pause(); }
       playing = false;
     }
     document.getElementById('play-icon').innerHTML = playing
@@ -656,6 +693,25 @@ function selecionarMelhores30(){
   showToast('Primeiros ' + end + 's selecionados ✂');
 }
 
+function moverPosVoz(v){
+  v = parseFloat(v);
+  voiceOffset = v;
+  document.getElementById('voz-pos-lbl').textContent = Math.floor(v) + 's';
+  var vid = document.getElementById('ev-video');
+  if(vid) vid.currentTime = v;
+}
+
+function initVozSlider(){
+  var vid = document.getElementById('ev-video');
+  if(!vid) return;
+  var dur = (isFinite(vid.duration) && vid.duration > 0)
+    ? Math.floor(vid.duration) : Math.max(1, recSec || 10);
+  var sl = document.getElementById('voz-pos');
+  sl.max = dur; sl.value = 0;
+  voiceOffset = 0;
+  document.getElementById('voz-pos-lbl').textContent = '0s';
+}
+
 function iniciarNaracao(){
   navigator.mediaDevices.getUserMedia({audio:true, video:false})
     .then(function(micStream){
@@ -668,17 +724,19 @@ function iniciarNaracao(){
           if(voiceUrl) URL.revokeObjectURL(voiceUrl);
           var blob = new Blob(voiceChunks, {type:'audio/webm'});
           voiceUrl = URL.createObjectURL(blob);
-          document.getElementById('voz-status').textContent = '✅ Narração gravada (' + voiceSec + 's)';
+          var pos = Math.floor(voiceOffset);
+          document.getElementById('voz-status').textContent = '✅ Narração gravada (' + voiceSec + 's) a partir de ' + pos + 's';
           document.getElementById('voz-acoes').style.display = 'block';
+          atualizarTrackNaracao();
         }
       };
       voiceRecorder.start(1000);
       var vid = document.getElementById('ev-video');
-      if(vid){ vid.currentTime = trimStart||0; vid.muted=false; vid.play(); }
+      if(vid){ vid.currentTime = voiceOffset; vid.muted=false; vid.play(); }
       document.getElementById('btn-narrar').style.display = 'none';
       document.getElementById('btn-parar-voz').style.display = 'flex';
       document.getElementById('voz-acoes').style.display = 'none';
-      document.getElementById('voz-status').textContent = '🔴 Gravando... 0s';
+      document.getElementById('voz-status').textContent = '🔴 Gravando a partir de ' + Math.floor(voiceOffset) + 's...';
       voiceTimer = setInterval(function(){
         voiceSec++;
         document.getElementById('voz-status').textContent = '🔴 Gravando... ' + voiceSec + 's';
@@ -699,14 +757,32 @@ function pararNaracao(){
 
 function ouvirNaracao(){
   if(!voiceUrl){ showToast('Nenhuma narração gravada'); return; }
-  var audio = new Audio(voiceUrl);
-  audio.play();
-  showToast('▶ Tocando narração...');
+  var vid = document.getElementById('ev-video');
+  if(vid){ vid.currentTime = voiceOffset; vid.muted=false; vid.play(); }
+  if(voicePlayAudio){ voicePlayAudio.pause(); voicePlayAudio=null; }
+  voicePlayAudio = new Audio(voiceUrl);
+  voicePlayAudio.play();
+  showToast('▶ Vídeo + narração sincronizados');
+}
+
+function atualizarTrackNaracao(){
+  var track = document.getElementById('voz-track');
+  if(!track) return;
+  var dur = (isFinite(document.getElementById('ev-video') && document.getElementById('ev-video').duration)
+    ? Math.floor(document.getElementById('ev-video').duration) : Math.max(1, recSec || 10));
+  var pct = Math.round((voiceOffset / dur) * 100);
+  var wPct = Math.min(100 - pct, Math.round((voiceSec / dur) * 100));
+  track.style.left = pct + '%';
+  track.style.width = Math.max(wPct, 5) + '%';
+  track.style.display = 'block';
 }
 
 function descartarNaracao(){
+  if(voicePlayAudio){ voicePlayAudio.pause(); voicePlayAudio=null; }
   if(voiceUrl){ URL.revokeObjectURL(voiceUrl); voiceUrl=null; }
   voiceChunks = [];
+  var track = document.getElementById('voz-track');
+  if(track) track.style.display = 'none';
   document.getElementById('voz-status').textContent = 'Pronto para gravar';
   document.getElementById('voz-acoes').style.display = 'none';
   showToast('Narração descartada');
