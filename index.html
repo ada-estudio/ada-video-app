@@ -534,8 +534,8 @@ function finalizarGravacao(){
         vid.muted = true;
         vid.playsInline = true;
         vid.setAttribute('playsinline','');
+        vid.style.zIndex = '1';
         evPreview.appendChild(vid);
-        vid.load();
         vid.play().catch(function(){});
         renderTimeline();
         initTrimUI();
@@ -619,8 +619,8 @@ function carregarClipeNoEditor(idx){
   vid.muted = true;
   vid.playsInline = true;
   vid.setAttribute('playsinline','');
+  vid.style.zIndex = '1';
   evPreview.appendChild(vid);
-  vid.load();
   // Update duration display
   var dur = clip.trimEnd || clip.duration || recSec || 0;
   var m=String(Math.floor(dur/60)).padStart(2,'0');
