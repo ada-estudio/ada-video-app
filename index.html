@@ -535,13 +535,15 @@ function finalizarGravacao(){
         vid.playsInline = true;
         vid.setAttribute('playsinline','');
         vid.style.zIndex = '1';
-        evPreview.appendChild(vid);
-        vid.play().catch(function(){});
-        renderTimeline();
-        initTrimUI();
+        goTo('editor','camera');
+        setTimeout(function(){
+          evPreview.appendChild(vid);
+          vid.play().catch(function(){});
+          renderTimeline();
+          initTrimUI();
+          setTimeout(initVozSlider, 400);
+        }, 150);
       }
-      goTo('editor','camera');
-      setTimeout(initVozSlider, 400);
     };
     mediaRecorder.stop();
   } else {
@@ -621,6 +623,7 @@ function carregarClipeNoEditor(idx){
   vid.setAttribute('playsinline','');
   vid.style.zIndex = '1';
   evPreview.appendChild(vid);
+  vid.play().catch(function(){});
   // Update duration display
   var dur = clip.trimEnd || clip.duration || recSec || 0;
   var m=String(Math.floor(dur/60)).padStart(2,'0');
