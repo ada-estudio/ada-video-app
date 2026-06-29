@@ -499,6 +499,7 @@ function iniciarGravacao(){
   if(stream && window.MediaRecorder){
     try {
       mediaRecorder = new MediaRecorder(stream);
+      var mrMimeType = mediaRecorder.mimeType || 'video/webm';
       mediaRecorder.ondataavailable = function(e){ if(e.data.size>0) recordedChunks.push(e.data); };
       mediaRecorder.start(1000);
     } catch(e){ mediaRecorder = null; }
@@ -536,7 +537,8 @@ function finalizarGravacao(){
     mediaRecorder.onstop = function(){
       if(recordedChunks.length > 0){
         if(recordedUrl) URL.revokeObjectURL(recordedUrl);
-        var blob = new Blob(recordedChunks, {type:'video/webm'});
+        var mType = (typeof mrMimeType !== 'undefined' && mrMimeType) ? mrMimeType : 'video/webm';
+        var blob = new Blob(recordedChunks, {type: mType});
         recordedUrl = URL.createObjectURL(blob);
         var clipName = 'Clipe ' + (clips.length + 1);
         var clip = {url:recordedUrl, name:clipName, trimStart:0, trimEnd:recSec, duration:recSec, type:'recorded'};
@@ -804,7 +806,12 @@ function gerarStrip(){
   var i = 0;
   var origTime = vid.currentTime;
   function captureNext(){
-    if(i >= N){ vid.currentTime = origTime; initStripDrag(); return; }
+    if(i >= N){
+      vid.onseeked = null; // encerra loop — sem isso fica buscando infinitamente
+      vid.currentTime = origTime;
+      initStripDrag();
+      return;
+    }
     vid.currentTime = (i / (N - 1)) * dur;
     vid.onseeked = function(){
       ctx.drawImage(vid, Math.round(i*fw), 0, Math.round(fw)+1, canvas.height);
@@ -1123,25 +1130,26 @@ function exportarReal(){
   document.getElementById('loading-txt').textContent = 'Exportando clipe...';
   document.getElementById('loading').classList.add('visible');
 
-  vid.currentTime = start;
-  vid.muted = false;
-  rec.start(100);
-
   var rafId;
   function drawLoop(){
     ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
     if(vid.currentTime >= end || vid.ended){
       cancelAnimationFrame(rafId);
       vid.pause();
+      vid.onseeked = null;
       rec.stop();
       return;
     }
     rafId = requestAnimationFrame(drawLoop);
   }
   vid.onseeked = function(){
+    vid.onseeked = null;
     vid.play();
     rafId = requestAnimationFrame(drawLoop);
   };
+  vid.currentTime = start;
+  vid.muted = false;
+  rec.start(100);
 }
 
 function simularIA(msg){
