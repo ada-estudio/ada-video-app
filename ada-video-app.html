@@ -375,15 +375,15 @@
       <h2 style="font-size:26px;font-weight:800;margin-bottom:10px">Vídeo pronto!</h2>
       <p style="font-size:14px;color:var(--text2);margin-bottom:36px;line-height:1.7">Seu vídeo foi exportado.<br>Compartilhe direto nas redes.</p>
       <div class="share-grid">
-        <button class="share-btn" onclick="showToast('Abrindo TikTok...')">
+        <button class="share-btn" onclick="compartilhar('tiktok')">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.56a8.17 8.17 0 004.79 1.54V6.65a4.85 4.85 0 01-1.02.04z" fill="#F8F8FF"/></svg>
           <span>TikTok</span>
         </button>
-        <button class="share-btn" onclick="showToast('Abrindo Instagram...')">
+        <button class="share-btn" onclick="compartilhar('reels')">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="#F8F8FF" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke="#F8F8FF" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="#F8F8FF"/></svg>
           <span>Reels</span>
         </button>
-        <button class="share-btn" onclick="showToast('Abrindo YouTube...')">
+        <button class="share-btn" onclick="compartilhar('shorts')">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" stroke="#F8F8FF" stroke-width="1.5"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" stroke="#F8F8FF" stroke-width="1.5" fill="none"/></svg>
           <span>Shorts</span>
         </button>
@@ -413,6 +413,7 @@ var playing = false;
 var playTimer = null;
 var exportCount = parseInt(localStorage.getItem('ada_exports')||'0');
 var videoCount = parseInt(localStorage.getItem('ada_videos')||'0');
+var lastExportedBlob = null;
 var stream = null;
 var facingMode = 'user';
 var mediaRecorder = null;
@@ -1114,6 +1115,7 @@ function exportarReal(){
     rec.onstop = function(){
       if(chunks.length === 0){ baixarCompleto(); return; }
       var blob = new Blob(chunks, {type: mType || 'video/webm'});
+      lastExportedBlob = blob;
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
@@ -1175,6 +1177,26 @@ function exportar(){
     updateStats();
     goTo('success','editor');
   },2400);
+}
+
+function compartilhar(plataforma){
+  var urls = {
+    tiktok: 'https://www.tiktok.com/upload',
+    reels:  'https://www.instagram.com/',
+    shorts: 'https://studio.youtube.com/'
+  };
+  if(lastExportedBlob && navigator.share){
+    var file = new File([lastExportedBlob], 'ada-video.webm', {type: lastExportedBlob.type || 'video/webm'});
+    var canShare = false;
+    try { canShare = navigator.canShare && navigator.canShare({files:[file]}); } catch(e){}
+    if(canShare){
+      navigator.share({files:[file], title:'Meu vídeo ADA', text:'Criado com ADA Video App'}).catch(function(){
+        window.open(urls[plataforma],'_blank');
+      });
+      return;
+    }
+  }
+  window.open(urls[plataforma],'_blank');
 }
 
 function novoVideo(){
